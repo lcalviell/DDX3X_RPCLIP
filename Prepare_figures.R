@@ -5,7 +5,6 @@ library(cowplot)
 
 trans <- function(x) {reso=-log(x, 10);reso[is.na(reso)]=0;return(reso)}
 inv <- function(x) 10^(-x)
-#setwd("/bfd/lcalviel/data/riboseq/new_ddx3/results/To_github/bef_submit/")
 load("data/processed_data.RData")
 dfa<-list_datasets$DE_siDDX3
 dfa<-dfa[dfa$keep,]
