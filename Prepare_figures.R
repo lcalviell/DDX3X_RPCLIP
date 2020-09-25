@@ -5,7 +5,7 @@ library(cowplot)
 
 trans <- function(x) {reso=-log(x, 10);reso[is.na(reso)]=0;return(reso)}
 inv <- function(x) 10^(-x)
-setwd("/bfd/lcalviel/data/riboseq/new_ddx3/results/To_github/")
+#setwd("/bfd/lcalviel/data/riboseq/new_ddx3/results/To_github/bef_submit/")
 load("data/processed_data.RData")
 dfa<-list_datasets$DE_siDDX3
 dfa<-dfa[dfa$keep,]
@@ -743,6 +743,53 @@ pdf(file = "figures/peak_diffconv.pdf",width = 8,height = 4)
 conv_specplot3+ylim(0,0.55) + theme(axis.title.x=element_blank(),
                                     axis.text.x=element_blank(),
                                     axis.ticks.x=element_blank())
+dev.off()
+
+
+res_clips_meta_ok<-list_datasets$peaks_parclips
+prots=c("DDX3X","EIF3B","FMR1","MOV10")
+dat<-melt(data.frame(res_clips_meta_ok))
+dat$position<-rep(1:(bin5+bin_c+bin_u),dim(res_clips_meta_ok)[2])
+dat2<-dat[dat$variable%in%prots,]
+dat2$variable<-factor(dat2$variable,prots)
+covpl<-ggplot(dat2,aes(x=position,y=value,group=variable,color=variable)) +
+    geom_vline(xintercept =bin5+1,col="black",lty=3)+
+    scale_color_manual(values = alpha(c("red","orange","forestgreen","blue"),.7),"RBP") + 
+    geom_line(size=1.1) +
+    geom_vline(xintercept =bin5+bin_c+1,col="black",lty=3)+ 
+    theme_classic() +
+    ylab("Aggregate\nPAR-CLIP peak score") +
+    xlab("") +
+    theme(axis.title.x = element_text(size=22),axis.text.x  = element_text(angle=0, vjust=0.5, size=13)) +
+    theme(axis.title.y = element_text(size=18),axis.text.y  = element_text(angle=0, vjust=0.5, size=15))  +
+    theme(strip.text.x = element_text(size=10, face="bold"),strip.text.y = element_text(size=24),strip.background = element_rect(colour="black", fill="white")) +
+    scale_x_continuous(breaks=c(0,bin5+1,bin5+bin_c+1,bin5+bin_c+bin_u+1), labels=c("TSS","start codon","stop codon","TES"))
+
+pdf(file = "figures/peak_aggregate_PARCLIPs.pdf",width = 8,height = 4)
+print(covpl)
+dev.off()
+
+
+res_clips_meta_ok<-list_datasets$peaks_eclips
+prots=c("DDX3X.K562","GEMIN5.K562","RPS3.K562","DDX6.K562")
+dat<-melt(data.frame(res_clips_meta_ok))
+dat$position<-rep(1:(bin5+bin_c+bin_u),dim(res_clips_meta_ok)[2])
+dat2<-dat[dat$variable%in%prots,]
+dat2$variable<-factor(dat2$variable,prots)
+covpl<-ggplot(dat2,aes(x=position,y=value,group=variable,color=variable)) +
+    geom_vline(xintercept =bin5+1,col="black",lty=3)+
+    scale_color_manual(values = alpha(c("red","orange","forestgreen","blue"),.7),"RBP") + 
+    geom_line(size=1.1) +
+    geom_vline(xintercept =bin5+bin_c+1,col="black",lty=3)+ 
+    theme_classic() +
+    ylab("Aggregate\nPAR-CLIP peak score") +
+    xlab("") +
+    theme(axis.title.x = element_text(size=22),axis.text.x  = element_text(angle=0, vjust=0.5, size=13)) +
+    theme(axis.title.y = element_text(size=18),axis.text.y  = element_text(angle=0, vjust=0.5, size=15))  +
+    theme(strip.text.x = element_text(size=10, face="bold"),strip.text.y = element_text(size=24),strip.background = element_rect(colour="black", fill="white")) +
+    scale_x_continuous(breaks=c(0,bin5+1,bin5+bin_c+1,bin5+bin_c+bin_u+1), labels=c("TSS","start codon","stop codon","TES"))
+pdf(file = "figures/peak_aggregate_ECLIPs.pdf",width = 8,height = 4)
+print(covpl)
 dev.off()
 
 
