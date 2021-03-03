@@ -5,7 +5,11 @@ library(cowplot)
 
 trans <- function(x) {reso=-log(x, 10);reso[is.na(reso)]=0;return(reso)}
 inv <- function(x) 10^(-x)
+
 load("data/processed_data.RData")
+
+#siDDX3 Ribo|RNA
+
 dfa<-list_datasets$DE_siDDX3
 dfa<-dfa[dfa$keep,]
 
@@ -52,6 +56,7 @@ pdf(file = "figures/DE_plot.pdf",width = 9,height = 5)
 ariborna
 dev.off()
 
+#siDDX3 5'UTR counts
 
 colsi<-alpha(c("blue","dark red","cornflowerblue","firebrick1","dark gray"),c(.8,.8,.8,.8,.3))
 names(colsi)<-c("TE_down","TE_up","Concordant_down","Concordant_up","mixed_ns")
@@ -66,6 +71,7 @@ pdf(file = "figures/DE_5riboskew.pdf",width = 7,height = 4)
 grd
 dev.off()
 
+#siDDX3 vs. Degron
 
 datasi<-dfa[,c("gene_id","symb","gene_biotype","log2FoldChange_RiboRNA","padj_RiboRNA")]
 dfadeg<-list_datasets$DE_degron
@@ -149,6 +155,7 @@ pdf(file = "figures/si_degron_plot.pdf",width = 9,height = 5)
 AAA
 dev.off()
 
+#mutant Ribo|RNA
 
 dfa<-list_datasets$DE_mutwt
 dfa<-dfa[dfa$keep,]
@@ -156,7 +163,7 @@ dfa<-dfa[dfa$keep,]
 dfa$padj2<-dfa$padj_RiboRNA
 dfa$padj2[is.na(dfa$padj2)]<-1
 dfa$padj2[dfa$padj2<10e-50]<-10e-50
-# add gene lengths to make rpkm column or like expression values
+
 dfa$experiment<-"R326H vs wt"
 
 
@@ -225,8 +232,7 @@ dev.off()
 
 
 
-
-
+#Degron data
 
 dfa<-list_datasets$DE_degron
 dfa<-dfa[dfa$keep,]
@@ -277,7 +283,7 @@ ariborna
 dev.off()
 
 
-#####RF
+#Random Forest results
 
 
 rf_bad<-list_datasets$RF_results_badpreds
@@ -491,7 +497,7 @@ rf_dens + facet_wrap(.~Var1,scales = "free")
 dev.off() 
 
 
-#rRNA
+#rRNA CLIP analysis
 
 
 minpos_rdna<-3000
@@ -629,6 +635,8 @@ parrnapl_fr2<-ggplot(signall_sup,aes(x=totpos,y=value,color=position2,shape=data
 pdf(file = "figures/suppl_rDNA_coveragepar.pdf",width = 8,height = 4)
 parrnapl_fr2+xlim(0,10000)
 dev.off()
+
+
 #PARCLIP mRNA
 
 
@@ -742,53 +750,6 @@ pdf(file = "figures/peak_diffconv.pdf",width = 8,height = 4)
 conv_specplot3+ylim(0,0.55) + theme(axis.title.x=element_blank(),
                                     axis.text.x=element_blank(),
                                     axis.ticks.x=element_blank())
-dev.off()
-
-
-res_clips_meta_ok<-list_datasets$peaks_parclips
-prots=c("DDX3X","EIF3B","FMR1","MOV10")
-dat<-melt(data.frame(res_clips_meta_ok))
-dat$position<-rep(1:(bin5+bin_c+bin_u),dim(res_clips_meta_ok)[2])
-dat2<-dat[dat$variable%in%prots,]
-dat2$variable<-factor(dat2$variable,prots)
-covpl<-ggplot(dat2,aes(x=position,y=value,group=variable,color=variable)) +
-    geom_vline(xintercept =bin5+1,col="black",lty=3)+
-    scale_color_manual(values = alpha(c("red","orange","forestgreen","blue"),.7),"RBP") + 
-    geom_line(size=1.1) +
-    geom_vline(xintercept =bin5+bin_c+1,col="black",lty=3)+ 
-    theme_classic() +
-    ylab("Aggregate\nPAR-CLIP peak score") +
-    xlab("") +
-    theme(axis.title.x = element_text(size=22),axis.text.x  = element_text(angle=0, vjust=0.5, size=13)) +
-    theme(axis.title.y = element_text(size=18),axis.text.y  = element_text(angle=0, vjust=0.5, size=15))  +
-    theme(strip.text.x = element_text(size=10, face="bold"),strip.text.y = element_text(size=24),strip.background = element_rect(colour="black", fill="white")) +
-    scale_x_continuous(breaks=c(0,bin5+1,bin5+bin_c+1,bin5+bin_c+bin_u+1), labels=c("TSS","start codon","stop codon","TES"))
-
-pdf(file = "figures/peak_aggregate_PARCLIPs.pdf",width = 8,height = 4)
-print(covpl)
-dev.off()
-
-
-res_clips_meta_ok<-list_datasets$peaks_eclips
-prots=c("DDX3X.K562","GEMIN5.K562","RPS3.K562","DDX6.K562")
-dat<-melt(data.frame(res_clips_meta_ok))
-dat$position<-rep(1:(bin5+bin_c+bin_u),dim(res_clips_meta_ok)[2])
-dat2<-dat[dat$variable%in%prots,]
-dat2$variable<-factor(dat2$variable,prots)
-covpl<-ggplot(dat2,aes(x=position,y=value,group=variable,color=variable)) +
-    geom_vline(xintercept =bin5+1,col="black",lty=3)+
-    scale_color_manual(values = alpha(c("red","orange","forestgreen","blue"),.7),"RBP") + 
-    geom_line(size=1.1) +
-    geom_vline(xintercept =bin5+bin_c+1,col="black",lty=3)+ 
-    theme_classic() +
-    ylab("Aggregate\nPAR-CLIP peak score") +
-    xlab("") +
-    theme(axis.title.x = element_text(size=22),axis.text.x  = element_text(angle=0, vjust=0.5, size=13)) +
-    theme(axis.title.y = element_text(size=18),axis.text.y  = element_text(angle=0, vjust=0.5, size=15))  +
-    theme(strip.text.x = element_text(size=10, face="bold"),strip.text.y = element_text(size=24),strip.background = element_rect(colour="black", fill="white")) +
-    scale_x_continuous(breaks=c(0,bin5+1,bin5+bin_c+1,bin5+bin_c+bin_u+1), labels=c("TSS","start codon","stop codon","TES"))
-pdf(file = "figures/peak_aggregate_ECLIPs.pdf",width = 8,height = 4)
-print(covpl)
 dev.off()
 
 
@@ -1000,103 +961,460 @@ pdf(file = "figures/si_degron_plot2.pdf",width = 9,height = 5)
 AAA
 dev.off()
 
+#Lasso vs Random Forest
 
 
-#SUPPL RF
+ress<-melt(lapply(list_datasets$RF_results$siDDX3$delta_TE,function(x){
+    x$importance
+}))
+ress<-ress[ress$Var2=="%IncMSE",]
+fts<-as.character(unique(ress$Var1[ress$Var1%in%colnames(aa)]))
+
+ress<-ress[ress$Var2=="%IncMSE",]
+ress$tocol<-F
+ress$tocol[ress$Var1%in%c("base_TE","GCpct_CDS","GCpct_fiveUT","scores_cert")]<-T
+
+ress$Var1<-gsub(ress$Var1,pattern = "scores_pqs" ,replacement = "G4_propensity")
+ress$Var1<-gsub(ress$Var1,pattern = "scores_top" ,replacement = "TOP_mRNA")
+ress$Var1<-gsub(ress$Var1,pattern = "scores_" ,replacement = "motifscores_")
+ress$Var1<-gsub(ress$Var1,pattern = "posdens_base" ,replacement = "Ribo_density")
+ress$Var1<-gsub(ress$Var1,pattern = "len" ,replacement = "_length")
+ress$Var1<-gsub(ress$Var1,pattern = "base_TE" ,replacement = "baseline_TE")
+ress$Var1<-gsub(ress$Var1,pattern = "base_intrex" ,replacement = "intron_exonratio")
 
 
-# 
-# rfone<-get(load("/bfd/lcalviel/data/riboseq/new_ddx3/results/siRNA_annotated/siRNA_annotated_results_DEDEX_res_RFreduced_onedelta"))
-# #datasi<-list_datasets$DE_siDDX3
-# res_corrs<-lapply(rfone$siDDX3,function(x){
-#     xx<-t(sapply(x,function(y){as.numeric(y$res_tests[1:4])}))
-#     colnames(xx)<-names(x[[1]]$res_tests[1:4])
-#     xx
-# })
-# ress<-data.frame(do.call(res_corrs,what = rbind))
-# ress$feat<-rep(names(res_corrs),each=10)
-# ress<-melt(ress)
-# 
-# rf_corplot<-ggplot(ress,aes(y=value,x=feat,group=feat,color=feat)) + 
-#     geom_jitter(alpha=.06) + 
-#     stat_summary(position=position_dodge(.6),size=.7) +
-#     ylab("Correlation") +
-#     xlab("") +
-#     #scale_color_manual(values = c("blue","dark red","cornflowerblue","firebrick1","dark gray"),"Tx_class") + 
-#     theme_classic() +
-#     theme(axis.title.x = element_text(size=22),axis.text.x  = element_text(angle=45, vjust=0.5, size=13)) +
-#     theme(axis.title.y = element_text(size=18),axis.text.y  = element_text(angle=0, vjust=0.5, size=15))  +
-#     theme(strip.text.x = element_text(size=10, face="bold"),strip.text.y = element_text(size=24),strip.background = element_rect(colour="black", fill="white"))+
-#     facet_wrap(.~variable)
-# 
-# 
-# ress<-data.frame(do.call(lapply(rfone$siDDX3$delta_TE,function(x){
-#     x$res_tests[[5]]
-# }),what = rbind))
-# 
-# ress<-data.frame(scale(ress))
-# ress$padj<-rfone$df_list$siDDX3$RiboRNA_padj[match(rownames(ress),rfone$df_list$siDDX3$gene_id)]
-# ress$padj2<-ress$padj
-# ress$padj2[is.na(ress$padj2)]<-1
-# ress$padj2[ress$padj2<10e-50]<-10e-50
-# 
-# ress$TPM<-rfone$df_list$siDDX3$TPM_RNA[match(rownames(ress),rfone$df_list$siDDX3$gene_id)]
-# 
-# rf_teplot<-ggplot(ress,aes(y=predicted,x=original,size=padj2,alpha=padj2)) +  geom_point() +theme_bw()+
-#     ylab(paste("TE log2FC\n(predicted)",sep = "")) +
-#     xlab(paste("TE log2FC\n(measured)",sep = "")) +
-#     theme(axis.title.x = element_text(size=22),axis.text.x  = element_text(angle=45, vjust=0.5, size=18)) +
-#     theme(axis.title.y = element_text(size=24),axis.text.y  = element_text(angle=45, vjust=0.5, size=18))  +
-#     theme(strip.background = element_rect(color="black", fill="white", size=1.5, linetype="solid")) +
-#     theme(strip.text.x = element_text(size = 15,face = "bold"))+
-#     scale_size_continuous("Adj. p-value",trans = scales::trans_new(name = "test",transform = trans,inverse = inv, 
-#                                                                    domain = c(1e-100, Inf)),breaks = c(10e-21,10e-11,10e-5,10e-3,1)) +
-#     scale_alpha_continuous("Adj. p-value",trans = scales::trans_new(name = "test",transform = trans,inverse = inv, 
-#                                                                     domain = c(1e-100, Inf)),breaks =  c(10e-21,10e-11,10e-5,10e-3)) 
-# 
-# pdf(file = "figures/si_RFred_plot.pdf",width = 9,height = 5)
-# rf_teplot + stat_cor(label.x = -8, label.y = 5,show.legend = F)
-# dev.off()
-# 
-# ress<-melt(lapply(rfone$siDDX3$delta_TE,function(x){
-#     x$importance
-# }))
-# 
-# ress<-ress[ress$Var2=="%IncMSE",]
-# ress$tocol<-F
-# ress$tocol[ress$Var1%in%c("base_TE","GCpct_CDS","GCpct_fiveUT","scores_cert")]<-T
-# 
-# ress$Var1<-gsub(ress$Var1,pattern = "scores_pqs" ,replacement = "G4_propensity")
-# ress$Var1<-gsub(ress$Var1,pattern = "scores_top" ,replacement = "TOP_mRNA")
-# ress$Var1<-gsub(ress$Var1,pattern = "scores_" ,replacement = "motifscores_")
-# ress$Var1<-gsub(ress$Var1,pattern = "posdens_base" ,replacement = "Ribo_density")
-# ress$Var1<-gsub(ress$Var1,pattern = "len" ,replacement = "_length")
-# ress$Var1<-gsub(ress$Var1,pattern = "base_TE" ,replacement = "baseline_TE")
-# ress$Var1<-gsub(ress$Var1,pattern = "base_intrex" ,replacement = "intron_exonratio")
-# 
-# ress$Var2<-NULL
-# ress$Var1<-factor(ress$Var1,levels=unique(ress$Var1))
-# 
-# vars<-unique(ress$Var1)
-# 
-# 
-# aaa<-ifelse(!vars%in%c("baseline_TE","GCpct_CDS","GCpct_fiveUT","motifscores_cert"), "black", "blue")
-# bbb<-ifelse(!vars%in%c("baseline_TE","GCpct_CDS","GCpct_fiveUT","motifscores_cert"), 13, 21)
-# 
-# rf_impor<-ggplot(ress,aes(y=Var1,x=value,color=tocol)) +  stat_summary() + geom_jitter(alpha=.5) +theme_bw()+
-#     ylab("") +
-#     xlab("Feature Importance") +
-#     scale_color_manual(values = c("black","blue"),"") +
-#     theme(axis.title.x = element_text(size=22),axis.text.x  = element_text(angle=45, vjust=0.5, size=18)) +
-#     theme(axis.title.y = element_text(size=24),axis.text.y  = element_text(angle=0, vjust=0.5, size=bbb,colour=aaa))  +
-#     theme(strip.background = element_rect(color="black", fill="white", size=1.5, linetype="solid")) +
-#     theme(strip.text.x = element_text(size = 15,face = "bold")) + theme(legend.position="none")
-# 
-# pdf(file = "figures/si_RFred_import.pdf",width = 8,height = 12)
-# rf_impor + theme( # remove the vertical grid lines
-#     panel.grid.major.x = element_blank() ,
-#     # explicitly set the horizontal lines (or they will disappear too)
-#     panel.grid.major.y = element_line( size=.1, color="black" ) 
-# )
-# dev.off()    
+aaa<-list_datasets$Lasso_importance
+aaa<-melt(abs(aaa))
 
+aaa$tocol<-F
+aaa$tocol[aaa$Var1%in%c("base_TE","GCpct_CDS","GCpct_fiveUT","scores_cert")]<-T
+
+aaa$Var1<-gsub(aaa$Var1,pattern = "scores_pqs" ,replacement = "G4_propensity")
+aaa$Var1<-gsub(aaa$Var1,pattern = "scores_top" ,replacement = "TOP_mRNA")
+aaa$Var1<-gsub(aaa$Var1,pattern = "scores_" ,replacement = "motifscores_")
+aaa$Var1<-gsub(aaa$Var1,pattern = "posdens_base" ,replacement = "Ribo_density")
+aaa$Var1<-gsub(aaa$Var1,pattern = "len" ,replacement = "_length")
+aaa$Var1<-gsub(aaa$Var1,pattern = "base_TE" ,replacement = "baseline_TE")
+aaa$Var1<-gsub(aaa$Var1,pattern = "base_intrex" ,replacement = "intron_exonratio")
+
+aaa$Var2<-NULL
+aaa$Var1<-factor(aaa$Var1,levels=unique(aaa$Var1))
+
+vars<-unique(aaa$Var1)
+
+
+aaa2<-ifelse(!vars%in%c("baseline_TE","GCpct_CDS","GCpct_fiveUT","motifscores_cert"), "black", "blue")
+bbb<-ifelse(!vars%in%c("baseline_TE","GCpct_CDS","GCpct_fiveUT","motifscores_cert"), 13, 21)
+
+
+lass_impor<-ggplot(aaa,aes(y=Var1,x=value,color=tocol)) +  stat_summary() + geom_jitter(alpha=.5) +theme_bw()+
+    ylab("") +
+    xlab("Feature Importance") +
+    scale_color_manual(values = c("black","blue"),"") +
+    theme(axis.title.x = element_text(size=22),axis.text.x  = element_text(angle=45, vjust=0.5, size=18)) +
+    theme(axis.title.y = element_text(size=24),axis.text.y  = element_text(angle=0, vjust=0.5, size=bbb,colour=aaa2))  +
+    theme(strip.background = element_rect(color="black", fill="white", size=1.5, linetype="solid")) +
+    theme(strip.text.x = element_text(size = 15,face = "bold")) + theme(legend.position="none")
+aaa$method<-"Lasso"
+ress$method<-"RF"
+
+all_fs<-rbind(aaa[,c("Var1","value","method")],ress[,c("Var1","value","method")])
+vars<-unique(all_fs$Var1)
+mns<-aggregate(all_fs$value,by=list(all_fs$Var1,all_fs$method),function(x){c(mean(x),sd(x))})
+mns$mean_L<-mns$x[,1]
+mns$sd_L<-mns$x[,2]
+mns$x<-NULL
+mns<-mns[order(paste(mns$Group.1,mns$Group.2)),]
+all_sdm<-mns[mns[,"Group.2"]=="Lasso",]
+all_sdm$mean_rf<-mns[mns[,"Group.2"]=="RF","mean_L"]
+all_sdm$sd_rf<-mns[mns[,"Group.2"]=="RF","sd_L"]
+
+vars<-unique(all_sdm$Group.1)
+aaa2<-ifelse(!vars%in%c("baseline_TE","GCpct_CDS","GCpct_fiveUT","motifscores_cert"), "black", "blue")
+bbb<-ifelse(!vars%in%c("baseline_TE","GCpct_CDS","GCpct_fiveUT","motifscores_cert"), 13, 21)
+all_sdm$labbe<-all_sdm$Group.1
+nopp<-which(all_sdm$mean_L<0.02 & all_sdm$mean_rf<0.004)
+all_sdm$labbe[nopp]<-NA
+all_impor<-ggplot(all_sdm,aes(y=mean_L,x=mean_rf,color=aaa2,label=labbe)) +  geom_point() +theme_bw()+
+    ylab("Feature importance (Lasso)") +
+    xlab("Feature Importance (Random Forest)") +
+    scale_color_manual(values = c("black","blue"),"") +
+    theme(axis.title.x = element_text(size=22),axis.text.x  = element_text(angle=45, vjust=0.5, size=18)) +
+    #scale_color_manual(values = aaa2)+
+    theme(axis.title.y = element_text(size=24),axis.text.y  = element_text(angle=45, vjust=0.5, size=18))  +
+    theme(strip.background = element_rect(color="black", fill="white", size=1.5, linetype="solid")) +
+    theme(strip.text.x = element_text(size = 15,face = "bold")) + theme(legend.position="none")+
+    geom_errorbar(aes(ymin = mean_L-sd_L,ymax = mean_L+sd_L)) + 
+    geom_errorbarh(aes(xmin = mean_rf-sd_rf,xmax = mean_rf+sd_rf)) +
+    geom_text_repel(size=5,force=32,show.legend = F)
+
+
+pdf(file = "figures/lasso_RF.pdf",width = 9,height = 6)
+all_impor
+dev.off()
+
+aa<-list_datasets$Lasso_RF_corrs
+
+cor_rfs<-ggplot(aa,aes(y=value,x=method)) + geom_bar(stat="identity") +
+    scale_fill_manual(values = "grey") +
+    theme_classic() +
+    ylab("Pearson correlation\npredicted vs. observed") +
+    xlab("") +
+    theme(axis.title.x = element_text(size=22),axis.text.x  = element_text(angle=45, vjust=0.5, size=15)) +
+    theme(axis.title.y = element_text(size=18),axis.text.y  = element_text(angle=0, vjust=0.5, size=15))  +
+    theme(strip.text.x = element_text(size=10, face="bold"),strip.text.y = element_text(size=24),strip.background = element_rect(colour="black", fill="white")) + 
+    theme(legend.position="none") + ylim(0,.6) + geom_text(aes(label = value),vjust=0)
+
+
+pdf(file = "figures/corr_lassoRF.pdf",width = 5,height = 5)
+print(cor_rfs)
+dev.off()
+
+
+
+
+dfa<-list_datasets$DE_siDDX3
+dfa<-dfa[dfa$keep,]
+
+dfa$log2FoldChange_RiboRNA<-dfa$log2FoldChange_RNA
+dfa$padj_RiboRNA<-dfa$padj_RNA
+
+datasi<-dfa[,c("gene_id","symb","gene_biotype","log2FoldChange_RiboRNA","padj_RiboRNA")]
+dfadeg<-list_datasets$DE_degron
+
+dfadeg$log2FoldChange_RiboRNA<-dfadeg$log2FoldChange_RNA
+dfadeg$padj_RiboRNA<-dfadeg$padj_RNA
+
+dfadeg<-dfadeg[dfadeg$gene_id%in%datasi$gene_id,]
+rownames(dfadeg)<-dfadeg$gene_id
+rownames(datasi)<-datasi$gene_id
+datasi<-datasi[rownames(dfadeg),]
+dfadeg$padj_RiboRNA_si<-datasi$padj_RiboRNA
+dfadeg$log2FoldChange_RiboRNA_si<-datasi$log2FoldChange_RiboRNA
+dfadeg$pmin<-apply(dfadeg[,c("padj_RiboRNA","padj_RiboRNA_si")],1,FUN = min)
+dfadeg$pmax<-apply(dfadeg[,c("padj_RiboRNA","padj_RiboRNA_si")],1,FUN = max)
+
+
+df2<-dfadeg[,c("log2FoldChange_RiboRNA","log2FoldChange_RiboRNA_si","padj_RiboRNA","padj_RiboRNA_si","symb","gene_biotype")]
+
+dfcp<-df2
+nimok<-colnames(df2)[1:2]
+trans <- function(x) -log(x, 10)
+inv <- function(x) 10^(-x)
+nmsok<-c("x_lfc","y_lfc","padj_RiboRNA","padj_RiboRNA_si","gene_name","gene_biotype")
+colnames(df2)<-nmsok
+df2$maxpv<-apply(df2[,3:4,drop=F],1,function(x){
+    if(sum(is.na(x))==length(x)){return(NA)}
+    else{return(mean(x,na.rm = T))}
+})
+df2<-df2[complete.cases(df2[,1:2]),]
+df2<-df2[!is.infinite(df2[,1]),]
+df2<-df2[!is.infinite(df2[,2]),]
+
+df1<-df2
+
+df2$confidence<-"low"
+
+ok<-which(df2$maxpv<.5)
+df2$confidence[which(df2$maxpv<.5)]<-"medium"
+
+if(length(ok)>2){
+    df22<-df2[ok,]
+    df22$confidence<-"medium"
+    df2<-rbind(df2,df22)
+}
+
+df2$confidence<-factor(df2$confidence,levels=c("low","medium","high"))
+
+ok<-which(df2$maxpv<.2)
+df2$confidence[ok]<-"high"
+if(length(ok)>2){
+    df22<-df2[ok,]
+    df22$confidence<-"high"
+    df2<-rbind(df2,df22)
+}
+
+
+corrpe<-c(unlist(by(df2,df2$confidence,FUN = function(x){cor.test(x[,1],x[,2])$estimate})))
+corrsp<-suppressWarnings(c(unlist(by(df2,df2$confidence,FUN = function(x){cor.test(x[,1],x[,2],method = "s")$estimate}))))
+df3<-data.frame(corrs=c(corrpe,corrsp),stringsAsFactors = F)
+df3$type<-rep(c("Pearson","Spearman"),c(length(corrpe),length(corrsp)))
+df3$confidence<-factor(c(names(corrpe),names(corrsp)),levels = c("low","medium","high"))
+df1$maxpv[df1$maxpv<1e-30]<-1e-30
+df1$maxpv[is.na(df1$maxpv)]<-1
+
+axm<-max(abs(c(df1$x_lfc,df1$y_lfc)),na.rm = T)
+dfplot<-unique(df1[complete.cases(df1[,1:2]),])
+dfplot$symbok<-NA
+dfplot$symbok[dfplot$gene_name=="ODC1"]<-"ODC1"
+dfplot2<-df2
+dfplot2$gene_biotype<-NULL
+
+dfplot$confidence="low"
+dfplot$confidence[dfplot$maxpv<.5]="medium"
+dfplot$confidence[dfplot$maxpv<.2]="high"
+dfplot$confidence<-factor(dfplot$confidence,levels=c("low","medium","high"))
+
+dfplot$pvalue_cutoff=">.5"
+dfplot$pvalue_cutoff[dfplot$maxpv<.5]="<.5"
+dfplot$pvalue_cutoff[dfplot$maxpv<.2]="<.2"
+dfplot$pvalue_cutoff<-factor(dfplot$pvalue_cutoff,levels=c(">.5","<.5","<.2"))
+
+
+AAA<-ggplot(data = dfplot, aes(x=x_lfc,y=y_lfc,size=maxpv,alpha=maxpv,label=symbok)) + geom_point() + theme_bw() +
+    xlab("RNA-seq log2FC\nDegron") +
+    ylab("RNA-seq log2FC\nsiDDX3X") +
+    theme(axis.title.x = element_text(size=22),axis.text.x  = element_text(angle=45, vjust=0.5, size=18)) +
+    theme(axis.title.y = element_text(size=24),axis.text.y  = element_text(angle=45, vjust=0.5, size=18)) +
+    scale_size_continuous("Adj. p-value (mean)",trans = scales::trans_new(name = "test",transform = trans,inverse = inv, 
+                                                                          domain = c(1e-50, Inf)),breaks = c(10e-11,10e-5,10e-3,10e-2)) +
+    scale_alpha_continuous("Adj. p-value (mean)",trans = scales::trans_new(name = "test",transform = trans,inverse = inv, 
+                                                                           domain = c(1e-10, Inf)),breaks = c(10e-10,10e-3,10e-3,10e-1)) 
+
+AAA<-AAA + geom_hline(yintercept = 0,size=.5) + geom_vline(xintercept = 0,size=.5) 
+
+suppressWarnings(AAA<-AAA  + geom_smooth(inherit.aes = F,data = dfplot,mapping = aes(x=x_lfc,y=y_lfc,group=pvalue_cutoff,color=pvalue_cutoff),method = "lm",show.legend = F,se = T,formula = "y ~ x"))
+
+AAA <- AAA  + ylim(-axm,axm) 
+AAA<-AAA + stat_cor(method = "p",inherit.aes = F,data = dfplot,aes(x=x_lfc,y=y_lfc,group=pvalue_cutoff,color=pvalue_cutoff),label.x = c(-6,-6,-6), label.y = c(1,2,3),show.legend = T)
+AAA1<-AAA + scale_color_manual(values = rev(c("dark blue","steelblue","grey12")),"pvalue_cutoff")
+
+
+
+dfa<-list_datasets$DE_siDDX3
+dfa<-dfa[dfa$keep,]
+
+dfa$log2FoldChange_RiboRNA<-dfa$log2FoldChange_Ribo
+dfa$padj_RiboRNA<-dfa$padj_Ribo
+
+datasi<-dfa[,c("gene_id","symb","gene_biotype","log2FoldChange_RiboRNA","padj_RiboRNA")]
+dfadeg<-list_datasets$DE_degron
+
+dfadeg$log2FoldChange_RiboRNA<-dfadeg$log2FoldChange_Ribo
+dfadeg$padj_RiboRNA<-dfadeg$padj_Ribo
+
+dfadeg<-dfadeg[dfadeg$gene_id%in%datasi$gene_id,]
+rownames(dfadeg)<-dfadeg$gene_id
+rownames(datasi)<-datasi$gene_id
+datasi<-datasi[rownames(dfadeg),]
+dfadeg$padj_RiboRNA_si<-datasi$padj_RiboRNA
+dfadeg$log2FoldChange_RiboRNA_si<-datasi$log2FoldChange_RiboRNA
+dfadeg$pmin<-apply(dfadeg[,c("padj_RiboRNA","padj_RiboRNA_si")],1,FUN = min)
+dfadeg$pmax<-apply(dfadeg[,c("padj_RiboRNA","padj_RiboRNA_si")],1,FUN = max)
+
+
+df2<-dfadeg[,c("log2FoldChange_RiboRNA","log2FoldChange_RiboRNA_si","padj_RiboRNA","padj_RiboRNA_si","symb","gene_biotype")]
+
+dfcp<-df2
+nimok<-colnames(df2)[1:2]
+trans <- function(x) -log(x, 10)
+inv <- function(x) 10^(-x)
+nmsok<-c("x_lfc","y_lfc","padj_RiboRNA","padj_RiboRNA_si","gene_name","gene_biotype")
+colnames(df2)<-nmsok
+df2$maxpv<-apply(df2[,3:4,drop=F],1,function(x){
+    if(sum(is.na(x))==length(x)){return(NA)}
+    else{return(mean(x,na.rm = T))}
+})
+df2<-df2[complete.cases(df2[,1:2]),]
+df2<-df2[!is.infinite(df2[,1]),]
+df2<-df2[!is.infinite(df2[,2]),]
+
+df1<-df2
+
+df2$confidence<-"low"
+
+ok<-which(df2$maxpv<.5)
+df2$confidence[which(df2$maxpv<.5)]<-"medium"
+
+if(length(ok)>2){
+    df22<-df2[ok,]
+    df22$confidence<-"medium"
+    df2<-rbind(df2,df22)
+}
+
+df2$confidence<-factor(df2$confidence,levels=c("low","medium","high"))
+
+ok<-which(df2$maxpv<.2)
+df2$confidence[ok]<-"high"
+if(length(ok)>2){
+    df22<-df2[ok,]
+    df22$confidence<-"high"
+    df2<-rbind(df2,df22)
+}
+
+
+corrpe<-c(unlist(by(df2,df2$confidence,FUN = function(x){cor.test(x[,1],x[,2])$estimate})))
+corrsp<-suppressWarnings(c(unlist(by(df2,df2$confidence,FUN = function(x){cor.test(x[,1],x[,2],method = "s")$estimate}))))
+df3<-data.frame(corrs=c(corrpe,corrsp),stringsAsFactors = F)
+df3$type<-rep(c("Pearson","Spearman"),c(length(corrpe),length(corrsp)))
+df3$confidence<-factor(c(names(corrpe),names(corrsp)),levels = c("low","medium","high"))
+df1$maxpv[df1$maxpv<1e-30]<-1e-30
+df1$maxpv[is.na(df1$maxpv)]<-1
+
+axm<-max(abs(c(df1$x_lfc,df1$y_lfc)),na.rm = T)
+dfplot<-unique(df1[complete.cases(df1[,1:2]),])
+dfplot$symbok<-NA
+dfplot$symbok[dfplot$gene_name=="ODC1"]<-"ODC1"
+dfplot2<-df2
+dfplot2$gene_biotype<-NULL
+
+dfplot$confidence="low"
+dfplot$confidence[dfplot$maxpv<.5]="medium"
+dfplot$confidence[dfplot$maxpv<.2]="high"
+dfplot$confidence<-factor(dfplot$confidence,levels=c("low","medium","high"))
+
+dfplot$pvalue_cutoff=">.5"
+dfplot$pvalue_cutoff[dfplot$maxpv<.5]="<.5"
+dfplot$pvalue_cutoff[dfplot$maxpv<.2]="<.2"
+dfplot$pvalue_cutoff<-factor(dfplot$pvalue_cutoff,levels=c(">.5","<.5","<.2"))
+
+
+AAA<-ggplot(data = dfplot, aes(x=x_lfc,y=y_lfc,size=maxpv,alpha=maxpv,label=symbok)) + geom_point() + theme_bw() +
+    xlab("Ribo-seq log2FC\nDegron") +
+    ylab("Ribo-seq log2FC\nsiDDX3X") +
+    theme(axis.title.x = element_text(size=22),axis.text.x  = element_text(angle=45, vjust=0.5, size=18)) +
+    theme(axis.title.y = element_text(size=24),axis.text.y  = element_text(angle=45, vjust=0.5, size=18)) +
+    scale_size_continuous("Adj. p-value (mean)",trans = scales::trans_new(name = "test",transform = trans,inverse = inv, 
+                                                                          domain = c(1e-50, Inf)),breaks = c(10e-11,10e-5,10e-3,10e-2)) +
+    scale_alpha_continuous("Adj. p-value (mean)",trans = scales::trans_new(name = "test",transform = trans,inverse = inv, 
+                                                                           domain = c(1e-10, Inf)),breaks = c(10e-10,10e-3,10e-3,10e-1)) 
+
+AAA<-AAA + geom_hline(yintercept = 0,size=.5) + geom_vline(xintercept = 0,size=.5) 
+
+suppressWarnings(AAA<-AAA  + geom_smooth(inherit.aes = F,data = dfplot,mapping = aes(x=x_lfc,y=y_lfc,group=pvalue_cutoff,color=pvalue_cutoff),method = "lm",show.legend = F,se = T,formula = "y ~ x"))
+
+AAA <- AAA  + ylim(-axm,axm) 
+AAA<-AAA + stat_cor(method = "p",inherit.aes = F,data = dfplot,aes(x=x_lfc,y=y_lfc,group=pvalue_cutoff,color=pvalue_cutoff),label.x = c(-6,-6,-6), label.y = c(1,2,3),show.legend = T)
+AAA2<-AAA + scale_color_manual(values = rev(c("dark blue","steelblue","grey12")),"pvalue_cutoff")
+
+dfa<-list_datasets$DE_siDDX3
+dfa<-dfa[dfa$keep,]
+datasi<-dfa[,c("gene_id","symb","gene_biotype","log2FoldChange_RiboRNA","padj_RiboRNA")]
+dfadeg<-list_datasets$DE_degron
+dfadeg<-dfadeg[dfadeg$gene_id%in%datasi$gene_id,]
+rownames(dfadeg)<-dfadeg$gene_id
+rownames(datasi)<-datasi$gene_id
+datasi<-datasi[rownames(dfadeg),]
+dfadeg$padj_RiboRNA_si<-datasi$padj_RiboRNA
+dfadeg$log2FoldChange_RiboRNA_si<-datasi$log2FoldChange_RiboRNA
+dfadeg$pmin<-apply(dfadeg[,c("padj_RiboRNA","padj_RiboRNA_si")],1,FUN = min)
+dfadeg$pmax<-apply(dfadeg[,c("padj_RiboRNA","padj_RiboRNA_si")],1,FUN = max)
+
+
+df2<-dfadeg[,c("log2FoldChange_RiboRNA","log2FoldChange_RiboRNA_si","padj_RiboRNA","padj_RiboRNA_si","symb","gene_biotype")]
+
+dfcp<-df2
+nimok<-colnames(df2)[1:2]
+trans <- function(x) -log(x, 10)
+inv <- function(x) 10^(-x)
+nmsok<-c("x_lfc","y_lfc","padj_RiboRNA","padj_RiboRNA_si","gene_name","gene_biotype")
+colnames(df2)<-nmsok
+df2$maxpv<-apply(df2[,3:4,drop=F],1,function(x){
+    if(sum(is.na(x))==length(x)){return(NA)}
+    else{return(mean(x,na.rm = T))}
+})
+df2<-df2[complete.cases(df2[,1:2]),]
+df2<-df2[!is.infinite(df2[,1]),]
+df2<-df2[!is.infinite(df2[,2]),]
+
+df1<-df2
+
+df2$confidence<-"low"
+
+ok<-which(df2$maxpv<.5)
+df2$confidence[which(df2$maxpv<.5)]<-"medium"
+
+if(length(ok)>2){
+    df22<-df2[ok,]
+    df22$confidence<-"medium"
+    df2<-rbind(df2,df22)
+}
+
+df2$confidence<-factor(df2$confidence,levels=c("low","medium","high"))
+
+ok<-which(df2$maxpv<.2)
+df2$confidence[ok]<-"high"
+if(length(ok)>2){
+    df22<-df2[ok,]
+    df22$confidence<-"high"
+    df2<-rbind(df2,df22)
+}
+
+
+corrpe<-c(unlist(by(df2,df2$confidence,FUN = function(x){cor.test(x[,1],x[,2])$estimate})))
+corrsp<-suppressWarnings(c(unlist(by(df2,df2$confidence,FUN = function(x){cor.test(x[,1],x[,2],method = "s")$estimate}))))
+df3<-data.frame(corrs=c(corrpe,corrsp),stringsAsFactors = F)
+df3$type<-rep(c("Pearson","Spearman"),c(length(corrpe),length(corrsp)))
+df3$confidence<-factor(c(names(corrpe),names(corrsp)),levels = c("low","medium","high"))
+df1$maxpv[df1$maxpv<1e-30]<-1e-30
+df1$maxpv[is.na(df1$maxpv)]<-1
+
+axm<-max(abs(c(df1$x_lfc,df1$y_lfc)),na.rm = T)
+dfplot<-unique(df1[complete.cases(df1[,1:2]),])
+dfplot$symbok<-NA
+dfplot$symbok[dfplot$gene_name=="ODC1"]<-"ODC1"
+dfplot2<-df2
+dfplot2$gene_biotype<-NULL
+
+dfplot$confidence="low"
+dfplot$confidence[dfplot$maxpv<.5]="medium"
+dfplot$confidence[dfplot$maxpv<.2]="high"
+dfplot$confidence<-factor(dfplot$confidence,levels=c("low","medium","high"))
+
+dfplot$pvalue_cutoff=">.5"
+dfplot$pvalue_cutoff[dfplot$maxpv<.5]="<.5"
+dfplot$pvalue_cutoff[dfplot$maxpv<.2]="<.2"
+dfplot$pvalue_cutoff<-factor(dfplot$pvalue_cutoff,levels=c(">.5","<.5","<.2"))
+
+
+AAA<-ggplot(data = dfplot, aes(x=x_lfc,y=y_lfc,size=maxpv,alpha=maxpv,label=symbok)) + geom_point() + theme_bw() +
+    xlab("TE log2FC\nDegron") +
+    ylab("TE log2FC\nsiDDX3X") +
+    theme(axis.title.x = element_text(size=22),axis.text.x  = element_text(angle=45, vjust=0.5, size=18)) +
+    theme(axis.title.y = element_text(size=24),axis.text.y  = element_text(angle=45, vjust=0.5, size=18)) +
+    scale_size_continuous("Adj. p-value (mean)",trans = scales::trans_new(name = "test",transform = trans,inverse = inv, 
+                                                                          domain = c(1e-50, Inf)),breaks = c(10e-11,10e-5,10e-3,10e-2)) +
+    scale_alpha_continuous("Adj. p-value (mean)",trans = scales::trans_new(name = "test",transform = trans,inverse = inv, 
+                                                                           domain = c(1e-10, Inf)),breaks = c(10e-10,10e-3,10e-3,10e-1)) 
+
+
+AAA<-AAA + geom_hline(yintercept = 0,size=.5) + geom_vline(xintercept = 0,size=.5) 
+
+suppressWarnings(AAA<-AAA  + geom_smooth(inherit.aes = F,data = dfplot,mapping = aes(x=x_lfc,y=y_lfc,group=pvalue_cutoff,color=pvalue_cutoff),method = "lm",show.legend = F,se = T,formula = "y ~ x"))
+
+AAA <- AAA  + ylim(-axm,axm) 
+AAA<-AAA + stat_cor(method = "p",inherit.aes = F,data = dfplot,aes(x=x_lfc,y=y_lfc,group=pvalue_cutoff,color=pvalue_cutoff),label.x = c(-6,-6,-6), label.y = c(1,2,3),show.legend = T)
+AAA<-AAA + scale_color_manual(values = rev(c("dark blue","steelblue","grey12")),"pvalue_cutoff")
+
+pdf(file = "figures/si_degron_allplots.pdf",width = 25,height = 6)
+plot_grid(AAA1,AAA2,AAA,align = "hv",nrow = 1)
+dev.off()
+
+
+#STREME motifs
+
+resall<-list_datasets$motif_finding_RBPs
+
+resall$pct_peaks<-resall$nsites/resall$npeaks
+#resall<-resall[resall$Var1=="all",]
+#resall<-resall[grep(as.character(resall$Var2),pattern = "1-"),]
+#resall<-do.call(lapply(split(resall,resall$RBP),function(x){x[order(x$value,decreasing = T)[1],]}),what = rbind)
+resall$RBP<-factor(resall$RBP,levels = unique(resall$RBP[order(resall$pval,decreasing = F)]))
+resall$pval[resall$pval<1e-40]<-1e-40
+vars<-levels(resall$RBP)
+aaa<-ifelse(grepl(vars,pattern = "DDX|^EIF"), "blue", "black")
+
+
+fracall<-ggplot(resall,aes(x=RBP,y=pval,size=pct_peaks)) + geom_jitter() +
+    #facet_wrap(dataset~.,nrow = 2,scales = "free") +
+    ylab("de novo motif P-value") +
+    xlab("") +
+    theme_classic() +
+    theme(axis.title.x = element_text(size=18),axis.text.x  = element_text(angle=45, vjust=0.5, size=18,color=aaa)) +
+    theme(axis.title.y = element_text(size=20),axis.text.y  = element_text(angle=45, vjust=0.5, size=15))  +
+    theme(strip.text.x = element_text(size=10, face="bold"),strip.text.y = element_text(size=24),strip.background = element_rect(colour="black", fill="white")) 
+fracall<-fracall + scale_y_log10(breaks=c(1,1e-10,1e-20,1e-30,1e-40),labels=c("1","1e-10","1e-20","1e-30","<1e-40")) + scale_size_continuous(breaks=c(5,20,50,80),"# sites per peak\nwith motif")
+
+pdf(file = "figures/streme_motifs.pdf",width = 25,height = 6)
+fracall
+dev.off()
