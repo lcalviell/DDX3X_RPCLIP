@@ -9,6 +9,11 @@ Here it is a collection of processed datasets and code to reproduce most of the 
 
 https://www.biorxiv.org/content/10.1101/589218v2
 
+now peer-reviewed at **NAR (2021)**, doi: https://doi.org/10.1093/nar/gkab287
+
+https://academic.oup.com/nar/advance-article/doi/10.1093/nar/gkab287/6255701
+
+
 
 In this repository we included the post-processing analysis scripts for Ribo-seq, RNA-seq and PAR-CLIP experiments performed in HEK293 cells.
 
